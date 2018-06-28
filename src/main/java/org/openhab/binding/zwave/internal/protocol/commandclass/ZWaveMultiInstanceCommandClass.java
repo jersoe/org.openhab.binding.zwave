@@ -210,10 +210,19 @@ public class ZWaveMultiInstanceCommandClass extends ZWaveCommandClass {
         CommandClass commandClass = CommandClass.getCommandClass(commandClassCode);
 
         if (commandClass == null) {
-            logger.debug(String.format("NODE %d: Unsupported command class 0x%02x", getNode().getNodeId(),
-                    commandClassCode));
+            if (this.getNode().getManufacturer() == 0x98 && this.getNode().getDeviceType() == 0x6501
+                    && this.getNode().getDeviceId() == 0xc) {
+                logger.debug(String.format(
+                        "NODE %d: DEVICE BUG WORKAROUND, handling MULTI_INSTANCE message as MULTI_CHANNEL",
+                        getNode().getNodeId()));
+                handleMultiChannelEncapResponse(serialMessage, offset);
+            } else {
+                logger.debug(String.format("NODE %d: Unsupported command class 0x%02x", getNode().getNodeId(),
+                        commandClassCode));
+            }
             return;
         }
+
 
         logger.debug(String.format("NODE %d: Requested Command Class = %s (0x%02x)", getNode().getNodeId(),
                 commandClass.getLabel(), commandClassCode));
